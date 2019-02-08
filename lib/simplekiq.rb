@@ -1,5 +1,6 @@
 require "simplekiq/version"
 require 'simplekiq/datadog'
+require 'simplekiq/worker'
 
 module Simplekiq
   class Error < StandardError; end
