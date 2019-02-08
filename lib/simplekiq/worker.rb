@@ -18,11 +18,9 @@ module Simplekiq
 
       def get_sidekiq_options
         self.sidekiq_options_hash ||=
-          begin
-            Sidekiq.default_worker_options.merge(
-              'queue' => self.name.downcase.chomp('worker')
-            )
-          end
+          Sidekiq.default_worker_options.merge(
+            'queue' => "#{::Rails.application.class.parent_name.downcase}-".concat(self.name.chomp('Worker'))
+        )
       end
     end
   end
