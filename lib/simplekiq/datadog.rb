@@ -3,19 +3,25 @@ require 'sidekiq/cli'
 require 'sidekiq-datadog'
 
 module Simplekiq
-  module Datadog
-    def self.config
-      Sidekiq.configure_server do |config|
-        config.server_middleware do |chain|
-          chain.add(
-            Sidekiq::Middleware::Server::Datadog,
-            tags: [
-              ->(worker, job, queue, error) {
-                "service:#{Rails.application.class.parent_name.downcase rescue 'undefined'}"
-              }
-            ]
-           )
+  class Datadog
+    class << self
+      def config
+        Sidekiq.configure_server do |config|
+          config.server_middleware do |chain|
+            chain.add(
+              Sidekiq::Middleware::Server::Datadog,
+              tags: [
+                ->(worker, job, queue, error) {
+                  "service:#{app_name}"
+                }
+              ]
+             )
+          end
         end
+      end
+
+      def app_name
+        Simplekiq.app_name || 'undefined'
       end
     end
   end

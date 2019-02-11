@@ -20,7 +20,7 @@ RSpec.describe Simplekiq::Datadog do
       before do
         stub_const('Rails', rails)
         allow(rails).to receive_message_chain(
-          'application.class.parent_name.downcase'
+          'application.class.parent_name.underscore'
         ).and_return('app_name')
       end
 

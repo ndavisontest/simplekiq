@@ -17,10 +17,27 @@ module Simplekiq
       include Sidekiq::Worker::ClassMethods
 
       def get_sidekiq_options
-        self.sidekiq_options_hash ||=
-          Sidekiq.default_worker_options.merge(
-            'queue' => "#{::Rails.application.class.parent_name.downcase}-".concat(self.name.chomp('Worker'))
+        self.sidekiq_options_hash ||= Sidekiq.default_worker_options.merge(
+          'queue' => queue_name
         )
+      end
+
+      private
+
+      def queue_name
+        "#{app_name}#{dash}#{worker_name}"
+      end
+
+      def dash
+        '-' unless app_name.nil?
+      end
+
+      def worker_name
+        name.chomp('Worker').underscore
+      end
+
+      def app_name
+        Simplekiq.app_name
       end
     end
   end
