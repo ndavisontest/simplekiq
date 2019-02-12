@@ -3,6 +3,8 @@ require 'spec_helper'
 RSpec.describe Simplekiq::Config do
   describe '#config' do
     before do
+      allow(Sidekiq.options).to receive(:[]).and_call_original
+      allow(Sidekiq.options).to receive(:[]).with(:queues).and_return(['default'])
       allow(Simplekiq::QueueGetter).to receive(:queues).and_return(['queue'])
     end
 
@@ -11,7 +13,7 @@ RSpec.describe Simplekiq::Config do
         Sidekiq.options[:lifecycle_events][:startup].first.call
       }.to change{
         Sidekiq.options[:queues]
-      }.from([]).to(['queue'])
+      }.from(['default']).to(['queue'])
     end
   end
 end

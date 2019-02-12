@@ -39,6 +39,8 @@ This will do two things:
 
 2. Running `bundle exec sidekiq` will autoload the queue names by introspecting the workers (NOTE: only workers in `app/workers` will be loaded)
 
+Do _not_ declare queues in your sidekiq configuration file, this will throw an error.
+
 #### Datadog
 
 Simplekiq comes with datadog configured out of the gate, including the stats that are already passed using the [sidekiq-datadog](https://github.com/bsm/sidekiq-datadog) gem simplekiq also passes a `service:my_app` tag through the sidekiq middleware.

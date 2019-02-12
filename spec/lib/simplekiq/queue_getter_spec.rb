@@ -65,5 +65,18 @@ RSpec.describe Simplekiq::QueueGetter do
         expect(described_class.queues).to eq([])
       end
     end
+
+    context 'when config file queues' do
+      before do
+        allow(File).to receive(:read).and_call_original
+        allow(File).to receive(:read).with(nil).and_return('')
+        allow(ERB).to receive(:read).and_return(double(result: ''))
+        allow(YAML).to receive(:load).and_return(double('[]' => ['queue']))
+      end
+
+      it 'raises error' do
+        expect{ described_class.queues }.to raise_error('Workers declared in config_file')
+      end
+    end
   end
 end
