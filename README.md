@@ -41,6 +41,19 @@ This will do two things:
 
 Do _not_ declare queues in your sidekiq configuration file, this will throw an error.
 
+#### Priority
+
+Instead of declaring the priority for queues in the sidekiq.yml file you can set it directly in a worker, if this is not set the worker will default to priority (1):
+
+```ruby
+class ReallyHardWorker
+  include Simplekiq::Worker
+  sidekiq_options priority: 2
+end
+```
+
+A higher priority means that queue will be sampled more often and have a higher chance of running the job.
+
 #### Datadog
 
 Simplekiq comes with datadog configured out of the gate, including the stats that are already passed using the [sidekiq-datadog](https://github.com/bsm/sidekiq-datadog) gem simplekiq also passes a `service:my_app` tag through the sidekiq middleware.

@@ -6,14 +6,18 @@ module Simplekiq
         load_workers!
 
         worker_classes.collect do |klass|
-          queue_name(klass)
-        end
+          [queue_name(klass)] * priority(klass)
+        end.flatten
       end
 
       private
 
       def queue_name(klass)
         klass.sidekiq_options['queue']
+      end
+
+      def priority(klass)
+        klass.sidekiq_options['priority'] || 1
       end
 
       def worker_classes

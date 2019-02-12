@@ -26,6 +26,19 @@ RSpec.describe Simplekiq::QueueGetter do
         end
       end
 
+      context 'when queue overridden' do
+        before do
+          class TacoMakingWorker
+            include Simplekiq::Worker
+            sidekiq_options priority: 2
+          end
+        end
+
+        it 'respects the override' do
+          expect(described_class.queues).to eq(['taco_making', 'taco_making'])
+        end
+      end
+
       context 'when rails defined' do
         let(:rails) { double('Rails') }
         before do
