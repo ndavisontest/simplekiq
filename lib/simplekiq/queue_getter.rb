@@ -2,6 +2,7 @@ module Simplekiq
   module QueueGetter
     class << self
       def queues
+        raise 'Workers declared in config_file' unless config_file_queues.nil?
         load_workers!
 
         worker_classes.collect do |klass|
@@ -25,6 +26,16 @@ module Simplekiq
         Dir[File.join('app', 'workers', '**', '*.rb')].each do |file|
           load file
         end
+      end
+
+      def config_file_queues
+        YAML.load(
+          ERB.new(
+            File.read(
+              Sidekiq.options[:config_file]
+            )
+          ).result
+        )[:queues] rescue nil
       end
     end
   end
