@@ -49,7 +49,13 @@ RSpec.describe Simplekiq::QueueGetter do
         end
 
         it 'overrides default queue' do
-          expect(described_class.queues).to eq(['app_name-taco_making'])
+          expect(described_class.queues).to match_array(
+            ['app_name-taco_making'] +
+            ['app_name-low'] * Simplekiq::DefaultQueues::LOW_PRIORITY +
+            ['app_name-medium'] * Simplekiq::DefaultQueues::MEDIUM_PRIORITY +
+            ['app_name-high'] * Simplekiq::DefaultQueues::HIGH_PRIORITY +
+            ['app_name-critical'] * Simplekiq::DefaultQueues::CRITICAL_PRIORITY
+          )
         end
 
         context 'when queue overridden' do
@@ -61,7 +67,13 @@ RSpec.describe Simplekiq::QueueGetter do
           end
 
           it 'respects the override' do
-            expect(described_class.queues).to eq(['some-queue'])
+            expect(described_class.queues).to match_array(
+              ['some-queue'] +
+              ['app_name-low'] * Simplekiq::DefaultQueues::LOW_PRIORITY +
+              ['app_name-medium'] * Simplekiq::DefaultQueues::MEDIUM_PRIORITY +
+              ['app_name-high'] * Simplekiq::DefaultQueues::HIGH_PRIORITY +
+              ['app_name-critical'] * Simplekiq::DefaultQueues::CRITICAL_PRIORITY
+            )
           end
         end
       end
