@@ -1,6 +1,7 @@
 require "simplekiq/version"
 require 'simplekiq/config'
 require 'simplekiq/datadog'
+require 'simplekiq/default_queues'
 require 'simplekiq/queue_getter'
 require 'simplekiq/worker'
 require 'string'
