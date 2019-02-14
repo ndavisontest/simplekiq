@@ -5,23 +5,15 @@ module Simplekiq
         raise 'Workers declared in config_file' unless config_file_queues.nil?
         load_workers!
 
-        default_queues + worker_queues
+        worker_classes.collect do |klass|
+          [queue_name(klass)] * priority(klass)
+        end.flatten
       end
 
       private
 
       def queue_name(klass)
         klass.sidekiq_options['queue']
-      end
-
-      def worker_queues
-        worker_classes.collect do |klass|
-          [queue_name(klass)] * priority(klass)
-        end.flatten
-      end
-
-      def default_queues
-        Simplekiq::DefaultQueues.queues
       end
 
       def priority(klass)
