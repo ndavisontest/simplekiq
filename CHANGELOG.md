@@ -1,5 +1,9 @@
 # Simplekiq Gem Changes
 
+### 1.3.0
+
+- Revert 1.2.0
+
 ### 1.2.0
 
 - Allow default queues for legacy jobs in rails projects
