@@ -24,11 +24,17 @@ Or install it yourself as:
 
 Use `include Simplekiq::Worker` instead of `Sidekiq::Worker`
 
+You can _only_ pass _one_ hash to the `perform` method. They should be named params, and `symbolized_keys` get's applied to the hash, so write tests and implementation accordingly.
+
+Workers should be _very_ simple. They should find or initaitialize another object and run _one_ method on it.
+
 ```ruby
-class ReallyHardWorker
+class TacoMakingWorker
   include Simplekiq::Worker
-  def perform(name, count)
-    # do something
+  def perform(params)
+    TacoMakingHandler.new(params).perform
+    OR
+    Taco.find(params[:taco_id]).make
   end
 end
 ```

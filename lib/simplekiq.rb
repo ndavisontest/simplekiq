@@ -1,9 +1,11 @@
-require "simplekiq/version"
+require 'active_support/core_ext/string'
+require 'hash'
+require 'simplekiq/version'
 require 'simplekiq/config'
 require 'simplekiq/datadog'
+require 'simplekiq/processor'
 require 'simplekiq/queue_getter'
 require 'simplekiq/worker'
-require 'string'
 
 module Simplekiq
   class Error < StandardError; end

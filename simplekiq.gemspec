@@ -25,6 +25,7 @@ Gem::Specification.new do |spec|
 
   spec.add_dependency "sidekiq-datadog", "~> 0.4"
   spec.add_dependency "sidekiq", "~> 5.2"
+  spec.add_dependency "activesupport", ">= 3.2"
 
   spec.add_development_dependency "pry", "~> 0.12"
   spec.add_development_dependency "bundler", "~> 1.17"
