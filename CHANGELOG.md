@@ -1,5 +1,9 @@
 # Simplekiq Gem Changes
 
+## 2.0.0
+
+- Enforce singular hash params being sent in perform
+
 ### 1.3.0
 
 - Revert 1.2.0
