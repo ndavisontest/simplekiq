@@ -1,5 +1,6 @@
 require 'active_support/core_ext/string'
 require 'hash'
+require 'sidekiq/cli'
 require 'simplekiq/version'
 require 'simplekiq/config'
 require 'simplekiq/datadog'

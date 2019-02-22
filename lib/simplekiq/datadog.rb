@@ -1,5 +1,4 @@
 require 'sidekiq'
-require 'sidekiq/cli'
 require 'sidekiq-datadog'
 
 module Simplekiq
