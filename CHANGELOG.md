@@ -1,5 +1,10 @@
 # Simplekiq Gem Changes
 
+### 2.1.0
+
+- Update simplekiq testing to allow perform_async to use symbolized keys
+- Mute Sidekiq config from outputting on bootup
+
 ## 2.0.0
 
 - Enforce singular hash params being sent in perform

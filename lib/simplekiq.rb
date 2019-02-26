@@ -6,6 +6,7 @@ require 'simplekiq/config'
 require 'simplekiq/datadog'
 require 'simplekiq/processor'
 require 'simplekiq/queue_getter'
+require 'simplekiq/redis_connection'
 require 'simplekiq/worker'
 
 module Simplekiq

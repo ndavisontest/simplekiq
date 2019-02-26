@@ -60,6 +60,10 @@ end
 
 A higher priority means that queue will be sampled more often and have a higher chance of running the job.
 
+### Testing
+
+Instead of requiring `sidekiq/testing`, require `simplekiq/testing` in your tests. This has all the functionality of the [original sidekiq gem](https://github.com/mperham/sidekiq/wiki/Testing), but also adheres to the symbolized params paradigm established by Simplekiq in tests.
+
 #### Datadog
 
 Simplekiq comes with datadog configured out of the gate, including the stats that are already passed using the [sidekiq-datadog](https://github.com/bsm/sidekiq-datadog) gem simplekiq also passes a `service:my_app` tag through the sidekiq middleware.
