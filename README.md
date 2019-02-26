@@ -41,7 +41,7 @@ end
 
 This will do two things:
 
-1. Your worker will default to the `really_hard` queue or if you are running it in a rails project it will default to the `my_app-really_hard` queue where `my_app` is your app name.
+1. Your worker will default to the `taco_making` queue or if you are running it in a rails project it will default to the `my_app-taco_making` queue where `my_app` is your app name.
 
 2. Running `bundle exec sidekiq` will autoload the queue names by introspecting the workers (NOTE: only workers in `app/workers` will be loaded)
 
