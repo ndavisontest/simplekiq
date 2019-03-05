@@ -1,5 +1,9 @@
 # Simplekiq Gem Changes
 
+### 3.0.0
+
+- Remove slash from namespaced queue names
+
 ### 2.1.0
 
 - Update simplekiq testing to allow perform_async to use symbolized keys

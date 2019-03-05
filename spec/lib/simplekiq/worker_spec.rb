@@ -37,6 +37,22 @@ RSpec.describe Simplekiq::Worker do
       end
     end
 
+    context 'namespaced class' do
+      context 'when no options are provided' do
+        before do
+          module Namespaced
+            class NoOptionsDummyWorker
+              include Simplekiq::Worker
+            end
+          end
+        end
+
+        it 'has a queue name which matches the worker name' do
+          expect(Namespaced::NoOptionsDummyWorker.get_sidekiq_options).to include('queue' => 'namespaced_no_options_dummy')
+        end
+      end
+    end
+
     context 'when its not a Rails app' do
       context 'when no options are provided' do
         before do

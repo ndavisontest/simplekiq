@@ -33,7 +33,7 @@ module Simplekiq
       end
 
       def worker_name
-        name.chomp('Worker').underscore
+        name.delete('::').chomp('Worker').underscore
       end
 
       def app_name
