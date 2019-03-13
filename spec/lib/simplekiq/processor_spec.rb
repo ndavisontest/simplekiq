@@ -6,10 +6,10 @@ RSpec.describe Sidekiq::Processor do
     let(:manager) { double('Manager', options: {queues: ['default']}) }
 
     it 'calls perform with symbolized keys' do
-      expect(worker).to receive(:perform).with(foo: { bar: 'baz' })
+      expect(worker).to receive(:perform).with(foo: [{ bar: 'baz' }])
 
       described_class.new(manager).execute_job(
-        worker, [{'foo' => { 'bar' => 'baz' }}]
+        worker, [{'foo' => [{ 'bar' => 'baz' }]}]
       )
     end
 
