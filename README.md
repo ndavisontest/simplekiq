@@ -68,6 +68,8 @@ Instead of requiring `sidekiq/testing`, require `simplekiq/testing` in your test
 
 Simplekiq comes with datadog configured out of the gate, including the stats that are already passed using the [sidekiq-datadog](https://github.com/bsm/sidekiq-datadog) gem simplekiq also passes a `service:my_app` tag through the sidekiq middleware.
 
+If you have Sidekiq::Pro then you can set the dogstatsd with DATADOG_HOST and DATADOG_PORT env variables.
+
 ## Development
 
 After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake spec` to run the tests.

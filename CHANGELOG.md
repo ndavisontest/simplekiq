@@ -1,5 +1,9 @@
 # Simplekiq Gem Changes
 
+### 3.1.0
+
+- Allow setting Sidekiq::Pro dogstatsd
+
 ### 3.0.1
 
 - Fix issue with deep symolize keys where it did not work on arrays
