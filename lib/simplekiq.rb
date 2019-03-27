@@ -1,5 +1,5 @@
 require 'active_support/core_ext/string'
-require 'hash'
+require 'core_extensions/hash'
 require 'sidekiq/cli'
 require 'simplekiq/version'
 require 'simplekiq/config'

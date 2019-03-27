@@ -1,5 +1,9 @@
 # Simplekiq Gem Changes
 
+### 3.1.1
+
+Move hash.rb to extensions to make the require path less ambiguous
+
 ### 3.1.0
 
 - Allow setting Sidekiq::Pro dogstatsd
