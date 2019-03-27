@@ -24,7 +24,7 @@ Gem::Specification.new do |spec|
   spec.require_paths = ['lib']
 
   spec.add_dependency 'activesupport', '>= 3.2'
-  spec.add_dependency 'dogstatsd-ruby', '~> 4.0'
+  spec.add_dependency 'dogstatsd-ruby', '>= 3.3'
   spec.add_dependency 'sidekiq', '~> 5.2'
   spec.add_dependency 'sidekiq-datadog', '~> 0.4'
 

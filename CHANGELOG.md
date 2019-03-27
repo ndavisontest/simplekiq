@@ -1,5 +1,9 @@
 # Simplekiq Gem Changes
 
+### 3.1.2
+
+Loosen the restriction on dogstatsd-ruby version
+
 ### 3.1.1
 
 Move hash.rb to extensions to make the require path less ambiguous
