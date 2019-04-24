@@ -4,16 +4,16 @@ module Chime
       module MetadataServer
         def call(_worker, job, _queue, *)
           begin
-            yield
             record(job)
+            yield
           end
         end
 
         def record(job)
-          job['_metadata'] = metadata
+          job['_metadata'] = server_metadata
         end
 
-        def metadata
+        def server_metadata
           {
             enqueued_at: enqueued_at,
             enqueued_from: enqueued_from,
