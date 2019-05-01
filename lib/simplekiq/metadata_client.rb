@@ -65,11 +65,11 @@ module Simplekiq
     end
 
     def processed_by
-      nil
+      @processed_service ||= Chime::Dog.config['app']
     end
 
     def processed_by_host
-      nil
+      @processed_host ||= Socket.gethostname
     end
 
     def retries
