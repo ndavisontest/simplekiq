@@ -1,5 +1,6 @@
-require 'sidekiq'
 require 'chime_atlas'
+require 'sidekiq'
+require 'time'
 
 module MetadataServer
   def config
@@ -36,7 +37,7 @@ module MetadataServer
   end
 
   def enqueued_at
-    nil
+    Time.now.utc.iso8601
   end
 
   def enqueued_from
