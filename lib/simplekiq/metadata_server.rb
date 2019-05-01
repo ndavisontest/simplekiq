@@ -43,11 +43,11 @@ module Simplekiq
     end
 
     def enqueued_from
-      Chime::Dog.config['app']
+      @enqueued_service ||= Chime::Dog.config['app']
     end
 
     def enqueued_from_host
-      @host ||= Socket.gethostname
+      @enqueued_host ||= Socket.gethostname
     end
 
     def enqueued_from_src_location
