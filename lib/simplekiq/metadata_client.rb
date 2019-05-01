@@ -23,13 +23,13 @@ module Simplekiq
     end
 
     def record_preexecute(job)
-      job['_metadata'] |= {}
-      job['_metadata'].merge(client_preexecute_metadata(job))
+      job[:_metadata] |= {}
+      job[:_metadata].merge(client_preexecute_metadata(job))
     end
 
     def record_postexecute(job)
-      job['_metadata'] |= {}
-      job['_metadata'].merge(client_postexecute_metadata(job))
+      job[:_metadata] |= {}
+      job[:_metadata].merge(client_postexecute_metadata(job))
     end
 
     def record_exception(job, e)
@@ -37,8 +37,9 @@ module Simplekiq
     end
 
     def client_preexecute_metadata(job)
+      now = processed_at
       {
-        first_processed_at: first_processed_at(job),
+        first_processed_at: first_processed_at(job, now),
         processed_at: processed_at,
         processed_by: processed_by,
         processed_by_host: processed_by_host
@@ -51,12 +52,16 @@ module Simplekiq
       }
     end
 
-    def first_processed_at(job)
-      nil
+    def first_processed_at(job, processed_at)
+      first_processed_at = job[:_metadata][:first_processed_at]
+      if first_processed_at.nil? || first_processed_at.empty?
+        first_processed_at = processed_at
+      end
+      first_processed_at
     end
 
     def processed_at
-      nil
+      Time.now.utc.iso8601
     end
 
     def processed_by
