@@ -1,4 +1,5 @@
 require 'sidekiq'
+require 'chime_atlas'
 
 module MetadataServer
   def config
@@ -31,7 +32,7 @@ module MetadataServer
   end
 
   def request_id
-    nil
+    Chime::Atlas.request_id
   end
 
   def enqueued_at
