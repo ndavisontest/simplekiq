@@ -43,7 +43,7 @@ module Simplekiq
     end
 
     def enqueued_from
-      nil
+      Chime::Dog.config['app']
     end
 
     def enqueued_from_host
