@@ -48,7 +48,7 @@ module Simplekiq
 
     def client_postexecute_metadata(job)
       {
-        retries: retries
+        retries: retries(job)
       }
     end
 
@@ -72,8 +72,10 @@ module Simplekiq
       @processed_host ||= Socket.gethostname
     end
 
-    def retries
-      nil
+    def retries(job)
+      return 0 if job[:_metadata][:retries].nil? or job[:_metadata][:retries].empty?
+
+      job[:_metadata][:retries] + 1
     end
 
     def dispatch_metadata_callback(worker, job, queue)
