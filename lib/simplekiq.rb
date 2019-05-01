@@ -16,8 +16,8 @@ module Simplekiq
     def config
       Datadog.config
       Config.config
-      MetadataServer.config
-      MetadataClient.config
+      MetadataServer.new.config
+      MetadataClient.new.config
     end
 
     def app_name
