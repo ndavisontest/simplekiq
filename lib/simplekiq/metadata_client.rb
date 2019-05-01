@@ -15,7 +15,7 @@ module Simplekiq
         record_preexecute(job)
         yield
       rescue e
-        record_exception(job, e)
+        record_error(job, e)
       ensure
         record_postexecute(job)
         dispatch_metadata_callback(worker, job, queue)
@@ -32,8 +32,11 @@ module Simplekiq
       job[:_metadata].merge(client_postexecute_metadata(job))
     end
 
-    def record_exception(job, e)
-      nil
+    def record_error(job, e)
+      job[:_metadata][:error] = {
+        message: e.message,
+        trace: e.backtrace.inspect
+      }
     end
 
     def client_preexecute_metadata(job)
