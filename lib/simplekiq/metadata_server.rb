@@ -2,7 +2,6 @@ require 'sidekiq'
 require 'simplekiq/metadata'
 require 'simplekiq/metadata_client'
 require 'simplekiq/metadata_recorder'
-require 'pry'
 
 module Simplekiq
   class MetadataServer
@@ -48,7 +47,9 @@ module Simplekiq
     end
 
     def add_metadata_error(job, e)
-      job[METADATA_KEY][:error] = {
+      # Just overwrite any prior error because this could be memory intensive
+      # under a situation with lots of retries
+      job[METADATA_KEY]['error'] = {
         message: e.message,
         trace: e.backtrace.inspect
       }
@@ -72,7 +73,7 @@ module Simplekiq
     end
 
     def elapsed_time_ms(begin_ref_micros)
-      ((get_process_time_micros - begin_ref_micros) / 1000).ceil.to_i
+      ((get_process_time_micros - begin_ref_micros) / 1_000).ceil.to_i
     end
 
     def first_processed_at(job, processed_at)

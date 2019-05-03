@@ -3,7 +3,7 @@ module Simplekiq
     METADATA_KEY = 'metadata'.freeze
 
     def get_process_time_micros
-      (Process.clock_gettime(Process::CLOCK_MONOTONIC) * 1000000).to_i
+      (Process.clock_gettime(Process::CLOCK_MONOTONIC) * 1_000_000).to_i
     end
 
     def get_time
