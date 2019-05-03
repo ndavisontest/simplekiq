@@ -2,7 +2,6 @@ require 'sidekiq'
 require 'simplekiq/metadata'
 require 'simplekiq/metadata_recorder'
 require 'socket'
-require 'time'
 
 module Simplekiq
   class MetadataClient

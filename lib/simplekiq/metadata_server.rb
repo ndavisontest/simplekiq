@@ -19,7 +19,7 @@ module Simplekiq
       end
     end
 
-    def call(_, job, _, *)
+    def call(_worker, job, _queue, *)
       begin_ref_micros = get_process_time_micros
       begin
         add_metadata_preexecute(job)

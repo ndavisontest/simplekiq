@@ -1,3 +1,5 @@
+require 'time'
+
 module Simplekiq
   module Metadata
     METADATA_KEY = 'metadata'.freeze
