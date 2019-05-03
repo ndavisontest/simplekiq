@@ -1,9 +1,14 @@
 require 'sidekiq'
+require 'simplekiq/metadata'
 require 'simplekiq/metadata_client'
+require 'simplekiq/metadata_recorder'
 require 'pry'
 
 module Simplekiq
   class MetadataServer
+    include Simplekiq::Metadata
+    include Simplekiq::MetadataRecorder
+
     def config
       Sidekiq.configure_server do |config|
         config.client_middleware do |chain|
@@ -15,38 +20,40 @@ module Simplekiq
       end
     end
 
-    def call(worker, job, queue, *)
-      binding.pry
+    def call(_, job, _, *)
       begin
-        record_preexecute(job)
+        add_metadata_preexecute(job)
         yield
       rescue e
-        record_error(job, e)
+        add_metadata_error(job, e)
       ensure
-        record_postexecute(job)
-        dispatch_metadata_callback(worker, job, queue)
+        add_metadata_postexecute(job)
+        record(job)
       end
     end
 
-    def record_preexecute(job)
-      binding.pry
-      job[:_metadata] |= {}
-      job[:_metadata].merge(client_preexecute_metadata(job))
+    def add_metadata_preexecute(job)
+      if job[METADATA_KEY].nil?
+        job[METADATA_KEY] = {}
+      end
+      job[METADATA_KEY].merge(server_preexecute_metadata(job))
     end
 
-    def record_postexecute(job)
-      job[:_metadata] |= {}
-      job[:_metadata].merge(client_postexecute_metadata(job))
+    def add_metadata_postexecute(job)
+      if job[METADATA_KEY].nil?
+        job[METADATA_KEY] = {}
+      end
+      job[METADATA_KEY].merge(server_postexecute_metadata(job))
     end
 
-    def record_error(job, e)
-      job[:_metadata][:error] = {
+    def add_metadata_error(job, e)
+      job[METADATA_KEY][:error] = {
         message: e.message,
         trace: e.backtrace.inspect
       }
     end
 
-    def client_preexecute_metadata(job)
+    def server_preexecute_metadata(job)
       now = processed_at
       {
         first_processed_at: first_processed_at(job, now),
@@ -56,14 +63,14 @@ module Simplekiq
       }
     end
 
-    def client_postexecute_metadata(job)
+    def server_postexecute_metadata(job)
       {
         retries: retries(job)
       }
     end
 
     def first_processed_at(job, processed_at)
-      first_processed_at = job[:_metadata][:first_processed_at]
+      first_processed_at = job[METADATA_KEY][:first_processed_at]
       if first_processed_at.nil? || first_processed_at.empty?
         first_processed_at = processed_at
       end
@@ -75,7 +82,7 @@ module Simplekiq
     end
 
     def processed_by
-      @processed_service ||= Chime::Dog.config['app']
+      @processed_service ||= Simplekiq.app_name
     end
 
     def processed_by_host
@@ -83,13 +90,10 @@ module Simplekiq
     end
 
     def retries(job)
-      return 0 if job[:_metadata][:retries].nil? or job[:_metadata][:retries].empty?
+      retries = job[METADATA_KEY]['retries']
+      return 0 if retries.nil? or retries.empty?
 
-      job[:_metadata][:retries] + 1
-    end
-
-    def dispatch_metadata_callback(worker, job, queue)
-      nil
+      job[METADATA_KEY]['retries'] + 1
     end
   end
 end
