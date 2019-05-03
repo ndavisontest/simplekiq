@@ -1,7 +1,7 @@
 require 'spec_helper'
 require 'simplekiq/testing'
 require 'simplekiq/metadata_recorder'
-require 'pry'
+require 'timecop'
 
 RSpec.describe Simplekiq::MetadataClient do
   let(:app) { 'APP' }
@@ -30,6 +30,30 @@ RSpec.describe Simplekiq::MetadataClient do
     it 'includes the request id in metadata' do
       allow(recorder).to receive(:record) do |job|
         expect(job[Simplekiq::Metadata::METADATA_KEY]['request_id']).to eq(request_id)
+      end
+      HardWorker.perform_async({})
+    end
+
+    it 'includes the service enqueueing the job in the metadata' do
+      allow(recorder).to receive(:record) do |job|
+        expect(job[Simplekiq::Metadata::METADATA_KEY]['enqueued_from']).to eq(app)
+      end
+      HardWorker.perform_async({})
+    end
+
+    it 'includes the host enqueueing the job in the metadata' do
+      allow(recorder).to receive(:record) do |job|
+        expect(job[Simplekiq::Metadata::METADATA_KEY]['enqueued_from_host']).to eq(hostname)
+      end
+      HardWorker.perform_async({})
+    end
+
+    it 'includes the time enqueueing the job in the metadata' do
+      now = Time.now
+      Timecop.freeze(now) do
+        allow(recorder).to receive(:record) do |job|
+          expect(job[Simplekiq::Metadata::METADATA_KEY]['enqueued_at']).to eq(now)
+        end
       end
       HardWorker.perform_async({})
     end

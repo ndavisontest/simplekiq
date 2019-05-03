@@ -3,7 +3,6 @@ require 'simplekiq/metadata'
 require 'simplekiq/metadata_recorder'
 require 'socket'
 require 'time'
-require 'pry'
 
 module Simplekiq
   class MetadataClient
@@ -19,12 +18,10 @@ module Simplekiq
     end
 
     def call(_worker, job, _queue, *)
-      #binding.pry
       begin
         add_metadata(job)
         yield
       ensure
-        binding.pry
         record(job)
       end
     end
