@@ -46,7 +46,7 @@ module Simplekiq
     end
 
     def enqueued_at
-      Time.now.utc.iso8601
+      get_time
     end
 
     def enqueued_from

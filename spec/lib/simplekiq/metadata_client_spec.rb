@@ -54,8 +54,8 @@ RSpec.describe Simplekiq::MetadataClient do
         allow(recorder).to receive(:record) do |job|
           expect(job[Simplekiq::Metadata::METADATA_KEY]['enqueued_at']).to eq(now)
         end
+        HardWorker.perform_async({})
       end
-      HardWorker.perform_async({})
     end
   end
 end

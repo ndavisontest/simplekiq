@@ -1,10 +1,14 @@
 require 'spec_helper'
 require 'simplekiq/testing'
-require 'pry'
 
 RSpec.describe Simplekiq::MetadataServer do
+  let(:app) { 'APP' }
+  let(:hostname) { 'HOSTNAME' }
+  let(:request_id) { 123 }
+  let(:recorder) { Simplekiq::MetadataRecorder }
+
   before do
-    Thread.current['atlas.request_id'] = 123
+    Thread.current['atlas.request_id'] = request_id
     Sidekiq::Testing.inline!
     Sidekiq::Testing.server_middleware do |chain|
       chain.add(Simplekiq::MetadataClient)
@@ -19,8 +23,14 @@ RSpec.describe Simplekiq::MetadataServer do
   end
 
   describe 'MetadataServer' do
-    it 'blah' do
-      HardWorker.perform_async({})
+    it 'includes the time the job started to process in the metadata' do
+      now = Time.now
+      Timecop.freeze(now) do
+        allow(recorder).to receive(:record) do |job|
+          expect(job[Simplekiq::Metadata::METADATA_KEY]['processed_at']).to eq(now)
+        end
+        HardWorker.perform_async({})
+      end
     end
   end
 end

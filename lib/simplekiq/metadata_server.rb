@@ -21,13 +21,14 @@ module Simplekiq
     end
 
     def call(_, job, _, *)
+      begin_ref_micros = get_process_time_micros
       begin
         add_metadata_preexecute(job)
         yield
       rescue e
         add_metadata_error(job, e)
       ensure
-        add_metadata_postexecute(job)
+        add_metadata_postexecute(job, begin_ref_micros)
         record(job)
       end
     end
@@ -39,11 +40,11 @@ module Simplekiq
       job[METADATA_KEY].merge(server_preexecute_metadata(job))
     end
 
-    def add_metadata_postexecute(job)
+    def add_metadata_postexecute(job, begin_ref_micros)
       if job[METADATA_KEY].nil?
         job[METADATA_KEY] = {}
       end
-      job[METADATA_KEY].merge(server_postexecute_metadata(job))
+      job[METADATA_KEY].merge(server_postexecute_metadata(job, begin_ref_micros))
     end
 
     def add_metadata_error(job, e)
@@ -63,14 +64,19 @@ module Simplekiq
       }
     end
 
-    def server_postexecute_metadata(job)
+    def server_postexecute_metadata(job, begin_ref_micros)
       {
+        elapsed_time_ms: elapsed_time_ms(begin_ref_micros),
         retries: retries(job)
       }
     end
 
+    def elapsed_time_ms(begin_ref_micros)
+      ((get_process_time_micros - begin_ref_micros) / 1000).ceil.to_i
+    end
+
     def first_processed_at(job, processed_at)
-      first_processed_at = job[METADATA_KEY][:first_processed_at]
+      first_processed_at = job[METADATA_KEY]['first_processed_at']
       if first_processed_at.nil? || first_processed_at.empty?
         first_processed_at = processed_at
       end
@@ -78,7 +84,7 @@ module Simplekiq
     end
 
     def processed_at
-      Time.now.utc.iso8601
+      get_time
     end
 
     def processed_by
