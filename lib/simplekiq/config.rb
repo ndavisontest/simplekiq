@@ -8,6 +8,10 @@ module Simplekiq
               Sidekiq.options = Sidekiq.options.merge(queues: QueueGetter.queues)
             end
           end
+
+          config.server_middleware do |chain|
+            chain.add(Simplekiq::RetryLimit)
+          end
         end
       end
     end

@@ -9,6 +9,7 @@ require 'simplekiq/metadata_client'
 require 'simplekiq/processor'
 require 'simplekiq/queue_getter'
 require 'simplekiq/redis_connection'
+require 'simplekiq/retry_limit'
 require 'simplekiq/worker'
 
 module Simplekiq
