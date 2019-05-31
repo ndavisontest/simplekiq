@@ -13,6 +13,20 @@ RSpec.describe Simplekiq::QueueGetter do
         expect(described_class.queues).to eq(['hard'])
       end
 
+      context 'when strict is true' do
+        before do
+          Sidekiq.options[:strict] = true
+        end
+
+        it 'sets strict option to false' do
+          expect{
+            described_class.queues
+          }.to change{
+            Sidekiq.options[:strict]
+          }.from(true).to(false)
+        end
+      end
+
       context 'when queue overridden' do
         before do
           class HardWorker

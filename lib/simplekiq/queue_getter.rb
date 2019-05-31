@@ -5,6 +5,8 @@ module Simplekiq
         raise 'Workers declared in config_file' unless config_file_queues.nil?
         load_workers!
 
+        Sidekiq.options[:strict] = false
+
         worker_classes.collect do |klass|
           [queue_name(klass)] * priority(klass)
         end.flatten

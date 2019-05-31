@@ -60,6 +60,10 @@ end
 
 A higher priority means that queue will be sampled more often and have a higher chance of running the job.
 
+#### Priority Strict
+
+Strict priority is not supported as there is no place to declare a list of workers.
+
 ### Testing
 
 Instead of requiring `sidekiq/testing`, require `simplekiq/testing` in your tests. This has all the functionality of the [original sidekiq gem](https://github.com/mperham/sidekiq/wiki/Testing), but also adheres to the symbolized params paradigm established by Simplekiq in tests.
