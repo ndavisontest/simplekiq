@@ -4,6 +4,8 @@ require 'sidekiq/cli'
 require 'simplekiq/version'
 require 'simplekiq/config'
 require 'simplekiq/datadog'
+require 'simplekiq/metadata_server'
+require 'simplekiq/metadata_client'
 require 'simplekiq/processor'
 require 'simplekiq/queue_getter'
 require 'simplekiq/redis_connection'
@@ -17,6 +19,8 @@ module Simplekiq
     def config
       Datadog.config
       Config.config
+      MetadataClient.new.config
+      MetadataServer.new.config
     end
 
     def app_name

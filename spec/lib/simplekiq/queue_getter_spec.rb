@@ -4,18 +4,18 @@ RSpec.describe Simplekiq::QueueGetter do
   describe '.queues' do
     context 'with simplekiq worker' do
       before do
-        class TacoMakingWorker
+        class HardWorker
           include Simplekiq::Worker
         end
       end
 
       it 'overrides default queue' do
-        expect(described_class.queues).to eq(['taco_making'])
+        expect(described_class.queues).to eq(['hard'])
       end
 
       context 'when queue overridden' do
         before do
-          class TacoMakingWorker
+          class HardWorker
             include Simplekiq::Worker
             sidekiq_options queue: 'some-queue'
           end
@@ -28,14 +28,14 @@ RSpec.describe Simplekiq::QueueGetter do
 
       context 'when queue overridden' do
         before do
-          class TacoMakingWorker
+          class HardWorker
             include Simplekiq::Worker
             sidekiq_options priority: 2
           end
         end
 
         it 'respects the override' do
-          expect(described_class.queues).to eq(['taco_making', 'taco_making'])
+          expect(described_class.queues).to eq(['hard', 'hard'])
         end
       end
 
@@ -49,12 +49,12 @@ RSpec.describe Simplekiq::QueueGetter do
         end
 
         it 'overrides default queue' do
-          expect(described_class.queues).to eq(['app_name-taco_making'])
+          expect(described_class.queues).to eq(['app_name-hard'])
         end
 
         context 'when queue overridden' do
           before do
-            class TacoMakingWorker
+            class HardWorker
               include Simplekiq::Worker
               sidekiq_options queue: 'some-queue'
             end
@@ -69,7 +69,7 @@ RSpec.describe Simplekiq::QueueGetter do
 
     context 'sidekiq worker' do
       before do
-        allow(TacoMakingWorker).to receive(:included_modules).and_return(
+        allow(HardWorker).to receive(:included_modules).and_return(
           [Sidekiq::Worker]
         )
       end

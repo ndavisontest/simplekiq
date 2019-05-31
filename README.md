@@ -29,7 +29,7 @@ You can _only_ pass _one_ hash to the `perform` method. They should be named par
 Workers should be _very_ simple. They should find or initaitialize another object and run _one_ method on it.
 
 ```ruby
-class TacoMakingWorker
+class HardWorker
   include Simplekiq::Worker
   def perform(params)
     TacoMakingHandler.new(params).perform
@@ -41,7 +41,7 @@ end
 
 This will do two things:
 
-1. Your worker will default to the `taco_making` queue or if you are running it in a rails project it will default to the `my_app-taco_making` queue where `my_app` is your app name.
+1. Your worker will default to the `hard` queue or if you are running it in a rails project it will default to the `my_app-hard` queue where `my_app` is your app name.
 
 2. Running `bundle exec sidekiq` will autoload the queue names by introspecting the workers (NOTE: only workers in `app/workers` will be loaded)
 
