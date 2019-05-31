@@ -26,6 +26,7 @@ module Simplekiq
         yield
       rescue e
         add_metadata_error(job, e)
+        raise e
       ensure
         add_metadata_postexecute(job, begin_ref_micros)
         record(job)
