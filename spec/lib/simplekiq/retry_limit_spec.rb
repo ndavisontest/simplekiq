@@ -2,12 +2,32 @@ require 'spec_helper'
 
 RSpec.describe Simplekiq::RetryLimit do
   context 'with sidekiq_options' do
-    let(:worker) { TacoMakingWorker.new }
+    let(:worker) { HardWorker.new }
     let(:job) { { 'retry' => 100 } }
+
+    context 'when retry limit middleware' do
+      before do
+        Sidekiq::Testing.server_middleware do |chain|
+          chain.add Simplekiq::RetryLimit
+        end
+
+        class HardWorker
+          include Simplekiq::Worker
+        end
+      end
+
+      it 'calls perform' do
+        expect_any_instance_of(HardWorker).to receive(:perform)
+
+        Sidekiq::Testing.inline! do
+          HardWorker.perform_async({})
+        end
+      end
+    end
 
     context 'when retry option is an integer' do
       before do
-        class TacoMakingWorker
+        class HardWorker
           include Simplekiq::Worker
           sidekiq_options retry: 0
         end
@@ -15,7 +35,8 @@ RSpec.describe Simplekiq::RetryLimit do
 
       it 'sets the retry key in the job' do
         expect{
-          described_class.new.call(worker, job, 'queue')
+          described_class.new.call(worker, job, 'queue') do
+          end
         }.to change{
           job['retry']
         }.from(100).to(0)
@@ -24,7 +45,7 @@ RSpec.describe Simplekiq::RetryLimit do
 
     context 'when retry option is a boolean' do
       before do
-        class TacoMakingWorker
+        class HardWorker
           include Simplekiq::Worker
           sidekiq_options retry: false
         end
@@ -32,7 +53,8 @@ RSpec.describe Simplekiq::RetryLimit do
 
       it 'sets the retry key in the job' do
         expect{
-          described_class.new.call(worker, job, 'queue')
+          described_class.new.call(worker, job, 'queue') do
+          end
         }.to change{
           job['retry']
         }.from(100).to(false)
@@ -41,7 +63,7 @@ RSpec.describe Simplekiq::RetryLimit do
 
     context 'without retry option' do
       before do
-        class TacoMakingWorker
+        class HardWorker
           include Simplekiq::Worker
           sidekiq_options foo: :bar
         end
@@ -49,7 +71,8 @@ RSpec.describe Simplekiq::RetryLimit do
 
       it 'sets to default retry of true' do
         expect{
-          described_class.new.call(worker, job, 'queue')
+          described_class.new.call(worker, job, 'queue') do
+          end
         }.to change{
           job['retry']
         }.from(100).to(true)
@@ -59,19 +82,20 @@ RSpec.describe Simplekiq::RetryLimit do
 
   context 'without sidekiq_options' do
     before do
-      class TacoMakingWorker
+      class HardWorker
         include Simplekiq::Worker
       end
     end
 
-    let(:worker) { TacoMakingWorker.new }
+    let(:worker) { HardWorker.new }
     let(:job) { { 'retry' => retry_value } }
 
     context 'integer retry' do
       let(:retry_value) { 100 }
       it 'does not set the retry key' do
         expect{
-          described_class.new.call(worker, job, 'queue')
+          described_class.new.call(worker, job, 'queue') do
+          end
         }.not_to change{ job['retry'] }
       end
     end
@@ -80,7 +104,8 @@ RSpec.describe Simplekiq::RetryLimit do
       let(:retry_value) { false }
       it 'does not set the retry key' do
         expect{
-          described_class.new.call(worker, job, 'queue')
+          described_class.new.call(worker, job, 'queue') do
+          end
         }.not_to change{ job['retry'] }
       end
     end
