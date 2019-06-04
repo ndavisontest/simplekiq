@@ -32,7 +32,5 @@ RSpec.describe Simplekiq::MetadataServer do
         HardWorker.perform_async({})
       end
     end
-
-
   end
 end

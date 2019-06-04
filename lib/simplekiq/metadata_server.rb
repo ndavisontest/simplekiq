@@ -24,7 +24,7 @@ module Simplekiq
       begin
         add_metadata_preexecute(job)
         yield
-      rescue e
+      rescue StandardError => e
         add_metadata_error(job, e)
         raise e
       ensure
