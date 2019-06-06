@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    simplekiq (3.2.3)
+    simplekiq (3.2.4)
       activesupport (>= 3.2)
       dogstatsd-ruby (>= 3.3)
       sidekiq (~> 5.2)
