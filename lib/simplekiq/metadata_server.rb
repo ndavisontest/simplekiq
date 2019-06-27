@@ -23,6 +23,7 @@ module Simplekiq
       begin_ref_micros = get_process_time_micros
       begin
         add_metadata_preexecute(job)
+        set_request_id(job)
         yield
       rescue StandardError => e
         add_metadata_error(job, e)
@@ -102,6 +103,12 @@ module Simplekiq
       return 0 if retries.nil? or retries.empty?
 
       job[METADATA_KEY]['retries'] + 1
+    end
+
+    def set_request_id(job)
+      if(job['request_id'])
+        Thread.current['atlas.request_id'] = job['request_id']
+      end
     end
   end
 end
