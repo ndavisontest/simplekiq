@@ -8,70 +8,30 @@ module Simplekiq
     include Simplekiq::Metadata
     include Simplekiq::MetadataRecorder
 
-    def config
-      Sidekiq.configure_server do |config|
-        config.client_middleware do |chain|
-          chain.add(Simplekiq::MetadataClient)
-        end
-        config.server_middleware do |chain|
-          chain.add(Simplekiq::MetadataServer)
-        end
-      end
-    end
-
     def call(_worker, job, _queue, *)
       begin_ref_micros = get_process_time_micros
       begin
-        add_metadata_preexecute(job)
-        set_request_id(job)
+        job.merge!(server_preexecute_metadata(job))
+        add_request_id_to_thread(job)
         yield
-      rescue StandardError => e
-        add_metadata_error(job, e)
-        raise e
       ensure
-        add_metadata_postexecute(job, begin_ref_micros)
+        job.merge!(server_postexecute_metadata(begin_ref_micros))
         record(job)
       end
-    end
-
-    def add_metadata_preexecute(job)
-      if job[METADATA_KEY].nil?
-        job[METADATA_KEY] = {}
-      end
-      job[METADATA_KEY].merge(server_preexecute_metadata(job))
-    end
-
-    def add_metadata_postexecute(job, begin_ref_micros)
-      if job[METADATA_KEY].nil?
-        job[METADATA_KEY] = {}
-      end
-      job[METADATA_KEY].merge(server_postexecute_metadata(job, begin_ref_micros))
-    end
-
-    def add_metadata_error(job, e)
-      # Just overwrite any prior error because this could be memory intensive
-      # under a situation with lots of retries
-      job[METADATA_KEY]['error'] = {
-        message: e.message,
-        trace: e.backtrace.inspect
-      }
     end
 
     def server_preexecute_metadata(job)
       now = processed_at
       {
-        first_processed_at: first_processed_at(job, now),
-        processed_at: processed_at,
-        processed_by: processed_by,
-        processed_by_host: processed_by_host
+        'first_processed_at' => first_processed_at(job, now),
+        'processed_at' => processed_at,
+        'processed_by' => processed_by,
+        'processed_by_host' => processed_by_host
       }
     end
 
-    def server_postexecute_metadata(job, begin_ref_micros)
-      {
-        elapsed_time_ms: elapsed_time_ms(begin_ref_micros),
-        retries: retries(job)
-      }
+    def server_postexecute_metadata(begin_ref_micros)
+      { 'elapsed_time_ms' => elapsed_time_ms(begin_ref_micros) }
     end
 
     def elapsed_time_ms(begin_ref_micros)
@@ -79,7 +39,7 @@ module Simplekiq
     end
 
     def first_processed_at(job, processed_at)
-      first_processed_at = job[METADATA_KEY]['first_processed_at']
+      first_processed_at = job['first_processed_at']
       if first_processed_at.nil? || first_processed_at.empty?
         first_processed_at = processed_at
       end
@@ -98,17 +58,11 @@ module Simplekiq
       @processed_host ||= Socket.gethostname
     end
 
-    def retries(job)
-      retries = job[METADATA_KEY]['retries']
-      return 0 if retries.nil? or retries.empty?
+    def add_request_id_to_thread(job)
+      return if job['request_id'].nil?
 
-      job[METADATA_KEY]['retries'] + 1
-    end
-
-    def set_request_id(job)
-      if(job['request_id'])
-        Thread.current['atlas.request_id'] = job['request_id']
-      end
+      # In the event the current job enqueues other jobs it will use the same request_id
+      Thread.current['atlas.request_id'] = job['request_id']
     end
   end
 end
