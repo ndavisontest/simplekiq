@@ -25,6 +25,7 @@ RSpec.describe Simplekiq::MetadataServer do
 
   after do
     Timecop.return
+    Thread.current['atlas.request_id'] = nil
   end
 
   describe 'MetadataServer' do
@@ -44,6 +45,7 @@ RSpec.describe Simplekiq::MetadataServer do
     context 'with request_id' do
       before do
         allow_any_instance_of(Simplekiq::MetadataClient).to receive(:request_id).and_return(request_id)
+        Thread.current['atlas.request_id'] = nil
       end
 
       it 'includes request_id in the following workers metadata' do

@@ -22,6 +22,10 @@ RSpec.describe Simplekiq::MetadataClient do
     end
   end
 
+  after do
+    Thread.current['atlas.request_id'] = nil
+  end
+
   describe 'MetadataClient' do
     it 'includes the request id in metadata' do
       expect_any_instance_of(Simplekiq::MetadataClient).to receive(:record) do |_, job|
