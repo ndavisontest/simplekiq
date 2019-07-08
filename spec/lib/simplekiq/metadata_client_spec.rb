@@ -26,26 +26,24 @@ RSpec.describe Simplekiq::MetadataClient do
     Thread.current['atlas.request_id'] = nil
   end
 
-  describe 'MetadataClient' do
-    it 'includes the request id in metadata' do
-      expect_any_instance_of(Simplekiq::MetadataClient).to receive(:record) do |_, job|
-        expect(job['request_id']).to eq(request_id)
-      end
-      HardWorker.perform_async({})
+  it 'includes the request id in metadata' do
+    expect_any_instance_of(Simplekiq::MetadataClient).to receive(:record) do |_, job|
+      expect(job['request_id']).to eq(request_id)
     end
+    HardWorker.perform_async({})
+  end
 
-    it 'includes the service enqueueing the job in the metadata' do
-      expect_any_instance_of(Simplekiq::MetadataClient).to receive(:record) do |_, job|
-        expect(job['enqueued_from']).to eq(app)
-      end
-      HardWorker.perform_async({})
+  it 'includes the service enqueueing the job in the metadata' do
+    expect_any_instance_of(Simplekiq::MetadataClient).to receive(:record) do |_, job|
+      expect(job['enqueued_from']).to eq(app)
     end
+    HardWorker.perform_async({})
+  end
 
-    it 'includes the host enqueueing the job in the metadata' do
-      expect_any_instance_of(Simplekiq::MetadataClient).to receive(:record) do |_, job|
-        expect(job['enqueued_from_host']).to eq(hostname)
-      end
-      HardWorker.perform_async({})
+  it 'includes the host enqueueing the job in the metadata' do
+    expect_any_instance_of(Simplekiq::MetadataClient).to receive(:record) do |_, job|
+      expect(job['enqueued_from_host']).to eq(hostname)
     end
+    HardWorker.perform_async({})
   end
 end
