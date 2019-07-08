@@ -2,6 +2,7 @@ require 'bundler/setup'
 require 'pry'
 require 'sidekiq/testing'
 require 'simplekiq'
+require 'timecop'
 
 RSpec.configure do |config|
   # Enable flags like --only-failures and --next-failure
