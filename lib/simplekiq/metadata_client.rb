@@ -24,10 +24,7 @@ module Simplekiq
     end
 
     def request_id
-      rid = Thread.current['atlas.request_id']
-      return rid unless rid.nil?
-
-      Thread.current['core.request_id']
+      Thread.current['atlas.request_id'] || Thread.current['core.request_id']
     end
 
     def enqueued_from
