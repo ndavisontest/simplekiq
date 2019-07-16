@@ -9,13 +9,17 @@ module Simplekiq
               Sidekiq.options = Sidekiq.options.merge(queues: QueueGetter.queues)
             end
           end
+          config.server_middleware do |chain|
+            chain.add(Simplekiq::MetadataServer)
+          end
           config.client_middleware do |chain|
             chain.add(Simplekiq::MetadataClient)
           end
         end
-        Sidekiq.configure_server do |config|
-          config.server_middleware do |chain|
-            chain.add(Simplekiq::MetadataServer)
+
+        Sidekiq.configure_client do |config|
+          config.client_middleware do |chain|
+            chain.add(Simplekiq::MetadataClient)
           end
         end
       end
