@@ -17,7 +17,6 @@ module Simplekiq
   # Your code goes here...
   class << self
     def config
-      Datadog.config
       Config.config
     end
 
