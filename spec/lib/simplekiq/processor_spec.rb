@@ -28,5 +28,23 @@ RSpec.describe Sidekiq::Processor do
         )
       }.to raise_error(NoMethodError)
     end
+
+    context 'worker class is Sidekiq::Batch::Callback' do
+      let(:worker) { Sidekiq::Batch::Callback.new }
+
+      it 'performs the worker' do
+        expect(worker).to receive(:perform).with({ 'foo' => [{ 'bar' => 'baz' }] }, 'qux', 'quux')
+
+        described_class.new(manager).execute_job(
+          worker, [{'foo' => [{ 'bar' => 'baz' }]}, 'qux', 'quux']
+        )
+      end
+
+      module Sidekiq
+        module Batch
+          class Callback; end
+        end
+      end
+    end
   end
 end
