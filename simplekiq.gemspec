@@ -25,6 +25,7 @@ Gem::Specification.new do |spec|
 
   spec.add_dependency 'activesupport', '>= 3.2'
   spec.add_dependency 'dogstatsd-ruby', '>= 3.3'
+  spec.add_dependency 'rollkiq', '~> 0.1'
   spec.add_dependency 'sidekiq', '~> 5.2'
   spec.add_dependency 'sidekiq-datadog', '~> 0.4'
 
