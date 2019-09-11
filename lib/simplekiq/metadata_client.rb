@@ -2,6 +2,7 @@ require 'sidekiq'
 require 'simplekiq/metadata'
 require 'simplekiq/metadata_recorder'
 require 'socket'
+require 'chime-atlas'
 
 module Simplekiq
   class MetadataClient
@@ -16,15 +17,10 @@ module Simplekiq
     end
 
     def client_metadata
-      {
+      Chime::Atlas::RequestContext.current.to_h.stringify_keys.merge(
         'enqueued_from' => enqueued_from,
-        'enqueued_from_host' => enqueued_from_host,
-        'request_id' => request_id
-      }
-    end
-
-    def request_id
-      Thread.current['atlas.request_id'] || Thread.current['core.request_id']
+        'enqueued_from_host' => enqueued_from_host
+      )
     end
 
     def enqueued_from

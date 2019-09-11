@@ -1,10 +1,17 @@
 require 'spec_helper'
-require 'simplekiq/testing'
+require 'sidekiq/testing'
 
 class HardWorker
   include Simplekiq::Worker
 
   def perform(_)
+  end
+end
+
+class ThreadCleaner
+  def call(_worker, _job, _queue, *)
+    Chime::Atlas::RequestContext.clear
+    yield
   end
 end
 
@@ -19,13 +26,14 @@ RSpec.describe Simplekiq::MetadataServer do
     Timecop.freeze
     Sidekiq::Testing.inline!
     Sidekiq::Testing.server_middleware do |chain|
+      chain.add(ThreadCleaner)
       chain.add(Simplekiq::MetadataServer)
     end
   end
 
   after do
     Timecop.return
-    Thread.current['atlas.request_id'] = nil
+    Chime::Atlas::RequestContext.clear
   end
 
   describe 'MetadataServer' do
@@ -44,12 +52,29 @@ RSpec.describe Simplekiq::MetadataServer do
 
     context 'with request_id' do
       before do
-        allow_any_instance_of(Simplekiq::MetadataClient).to receive(:request_id).and_return(request_id)
-        Thread.current['atlas.request_id'] = nil
+        Chime::Atlas::RequestContext.set(request_id: request_id)
       end
 
       it 'includes request_id in the following workers metadata' do
-        expect{ HardWorker.perform_async({}) }.to change{ Thread.current['atlas.request_id'] }.from(nil).to(request_id)
+        expect_any_instance_of(ThreadCleaner).to receive(:call) do |_, _, job|
+          expect(job['request_id']).to eq(request_id)
+        end.and_call_original
+
+        expect_any_instance_of(Simplekiq::MetadataServer).to receive(:call) do |_|
+          expect(Chime::Atlas::RequestContext.current.to_h[:request_id]).to be_nil
+        end.and_call_original
+
+        HardWorker.perform_async({})
+
+        expect(Chime::Atlas::RequestContext.current.to_h[:request_id]).to eq(request_id)
+      end
+    end
+
+    context 'when a job has request id' do
+      it 'adds it to the thread' do
+        job = { 'request_id' => request_id }
+        Simplekiq::MetadataServer.new.call(nil, job, nil) { HardWorker.perform_async({}) }
+        expect(Chime::Atlas::RequestContext.current.to_h[:request_id]).to eq(request_id)
       end
     end
   end

@@ -2,6 +2,7 @@ require 'spec_helper'
 require 'simplekiq/testing'
 require 'simplekiq/metadata_recorder'
 require 'timecop'
+require 'chime-atlas'
 
 RSpec.describe Simplekiq::MetadataClient do
   let(:app) { 'APP' }
@@ -9,6 +10,7 @@ RSpec.describe Simplekiq::MetadataClient do
   let(:request_id) { 123 }
 
   before do
+    Chime::Atlas::RequestContext.set(request_id: request_id)
     Thread.current['atlas.request_id'] = request_id
     Sidekiq::Testing.inline!
     allow(Socket).to receive(:gethostname).and_return(hostname)
@@ -23,7 +25,7 @@ RSpec.describe Simplekiq::MetadataClient do
   end
 
   after do
-    Thread.current['atlas.request_id'] = nil
+    Chime::Atlas::RequestContext.clear
   end
 
   it 'includes the request id in metadata' do

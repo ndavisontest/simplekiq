@@ -2,6 +2,7 @@ require 'sidekiq'
 require 'simplekiq/metadata'
 require 'simplekiq/metadata_client'
 require 'simplekiq/metadata_recorder'
+require 'chime-atlas'
 
 module Simplekiq
   class MetadataServer
@@ -12,7 +13,7 @@ module Simplekiq
       begin_ref_micros = get_process_time_micros
       begin
         job.merge!(server_preexecute_metadata(job))
-        add_request_id_to_thread(job)
+        apply_metadata_to_thread(job)
         yield
       ensure
         job.merge!(server_postexecute_metadata(begin_ref_micros))
@@ -58,11 +59,11 @@ module Simplekiq
       @processed_host ||= Socket.gethostname
     end
 
-    def add_request_id_to_thread(job)
-      return if job['request_id'].nil?
+    def apply_metadata_to_thread(job)
+      metadata = job.symbolize_keys.slice(:request_id, :trace_id, :sampling_priority)
 
       # In the event the current job enqueues other jobs it will use the same request_id
-      Thread.current['atlas.request_id'] = job['request_id']
+      Chime::Atlas::RequestContext.set(metadata)
     end
   end
 end
