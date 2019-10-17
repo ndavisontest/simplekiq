@@ -53,6 +53,19 @@ RSpec.describe Simplekiq::QueueGetter do
         end
       end
 
+      context 'when it is disabled from SIMPLEKIQ_SKIP_QUEUES' do
+        before do
+          class HardWorker
+            include Simplekiq::Worker
+          end
+        end
+
+        it 'respects the override' do
+          allow(ENV).to receive(:fetch).with('SIMPLEKIQ_SKIP_QUEUES', '').and_return('hard')
+          expect(described_class.queues).to eq([])
+        end
+      end
+
       context 'when rails defined' do
         let(:rails) { double('Rails') }
         before do

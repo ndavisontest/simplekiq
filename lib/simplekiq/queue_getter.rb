@@ -7,9 +7,11 @@ module Simplekiq
 
         Sidekiq.options[:strict] = false
 
+        disabled_queues = ENV.fetch('SIMPLEKIQ_SKIP_QUEUES', '').split(',')
+
         worker_classes.collect do |klass|
           [queue_name(klass)] * priority(klass)
-        end.flatten
+        end.flatten.reject { |klass| disabled_queues.include?(klass) }
       end
 
       private
