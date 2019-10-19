@@ -5,15 +5,28 @@ require 'sidekiq/fetch'
 module Simplekiq
   # A Sidekiq work fetcher that can rate-limit queues.
   class ThrottleFetch < Sidekiq::BasicFetch
-    THROTTLE_CONFIG_KEY = 'throttle_fetch_config'
+    # TODO: What is Sidekiq::Pro:BasicFetch is around?
+    CONFIG_KEY = 'simplekiq_throttle_fetch_config'
+    EXPIRE_SECONDS = 60 * 60 * 10
+
+    attr_reader :throttle_config
+
+    def initialize(options)
+      super(options)
+
+      @throttle_config = redis_intmap(CONFIG_KEY)
+    end
 
     # Override: Note the work retrieved by the base class and
     # increment the value in a per-minute, per-queue counter.
     def retrieve_work
       work = super
       if work && throttle_config.key?(work.queue_name)
-        # TODO Set these keys to expire in 4 hours to prevent unbounded growth.
-        Sidekiq.redis { |conn| conn.incr(time_sample_key(work.queue_name)) }
+        current_key = time_sample_key(Time.now)
+        Sidekiq.redis do |conn|
+          conn.hincr(current_key, work.queue_name)
+          conn.expire(current_key, EXPIRE_SECONDS)
+        end
       end
 
       work
@@ -29,41 +42,19 @@ module Simplekiq
     def active_throttles
       return [] if throttle_config.empty?
 
-      cur = current_throttle_rates
-      conf = throttle_config
-
-      conf.keys.select { |k| cur.key?(k) && cur[k] > conf[k] }
+      cur = redis_intmap(time_sample_key(Time.now))
+      throttle_config.keys.select { |k| cur.key?(k) && cur[k] > throttle_config[k] }
     end
 
-    # Return a hash
-    def current_throttle_rates
-      now_ts = Time.now
-      counter_keys = throttle_queues.map { |queue| time_sample_key(queue, now_ts) }
-      counter_rates = Sidekiq.redis { |conn| conn.mget(counter_keys) }.map(&:to_i)
-
-      # Build hash of results, recovering the queue name from the end
-      # of the time_sample_key()-created redis location.
-      counter_keys
-        .map { |k| k.split(':').last }
-        .zip(counter_rates)
-        .to_h
-    end
-
-    def throttle_queues
-      throttle_config.keys
-    end
-
-    # Redis-backed throttle config: map of queue names to their per-minute max.
-    # TODO: Memoize?
-    def throttle_config
+    def self.redis_intmap(key)
       Sidekiq
-        .redis { |conn| conn.hgetall(THROTTLE_CONFIG_KEY) }
-        .transform_values(&:to_i)
+        .redis { |conn| conn.hgetall(key) }
+        .reduce({}) { |acc, (k, v)| acc.merge(k => v.to_i) }
     end
 
-    def self.time_sample_key(queue, time = Time.now)
+    def self.time_sample_key(time)
       sample_ts = time.strftime('%Y%m%d%H%M')
-      "tfetch:#{sample_ts}:#{queue}"
+      "throttle_fetch:#{sample_ts}"
     end
   end
 end
