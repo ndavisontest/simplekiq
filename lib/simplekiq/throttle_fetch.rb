@@ -15,16 +15,18 @@ module Simplekiq
       super(options)
 
       @throttle_config = redis_intmap(CONFIG_KEY)
+      Sidekiq.logger.info("Using throttle config: #{throttle_config}")
     end
 
     # Override: Note the work retrieved by the base class and
     # increment the value in a per-minute, per-queue counter.
     def retrieve_work
       work = super
+
+      current_key = time_sample_key(Time.now)
       if work && throttle_config.key?(work.queue_name)
-        current_key = time_sample_key(Time.now)
         Sidekiq.redis do |conn|
-          conn.hincr(current_key, work.queue_name)
+          conn.hincrby(current_key, work.queue_name, 1)
           conn.expire(current_key, EXPIRE_SECONDS)
         end
       end
@@ -43,16 +45,19 @@ module Simplekiq
       return [] if throttle_config.empty?
 
       cur = redis_intmap(time_sample_key(Time.now))
-      throttle_config.keys.select { |k| cur.key?(k) && cur[k] > throttle_config[k] }
+      throttle_config
+        .keys
+        .select { |k| cur.key?(k) && cur[k] > throttle_config[k] }
+        .map { |k| "queue:#{k}" }
     end
 
-    def self.redis_intmap(key)
+    def redis_intmap(key)
       Sidekiq
         .redis { |conn| conn.hgetall(key) }
         .reduce({}) { |acc, (k, v)| acc.merge(k => v.to_i) }
     end
 
-    def self.time_sample_key(time)
+    def time_sample_key(time)
       sample_ts = time.strftime('%Y%m%d%H%M')
       "throttle_fetch:#{sample_ts}"
     end
