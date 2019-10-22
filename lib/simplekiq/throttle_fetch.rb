@@ -1,18 +1,22 @@
 # frozen_string_literal: true
 
-require 'sidekiq/fetch'
+require 'sidekiq/pro/super_fetch'
 
 module Simplekiq
   # A Sidekiq work fetcher that can rate-limit queues.
-  class ThrottleFetch < Sidekiq::BasicFetch
-    # TODO: What is Sidekiq::Pro:BasicFetch is around?
+  #
+  # Install *after* Sidekiq.config.super_fetch! via:
+  # require 'simplekiq/throttle_fetch'
+  # Sidekiq.options[:fetch] = Simplekiq::ThrottleFetch
+  class ThrottleFetch < Sidekiq::Pro::SuperFetch
     CONFIG_KEY = 'simplekiq_throttle_fetch_config'
     EXPIRE_SECONDS = 60 * 60 * 10
 
     attr_reader :throttle_config
 
-    def initialize(options)
-      super(options)
+    def initialize(retriever = Sidekiq::Pro::SuperFetch::Retriever.instance, options)
+      super(retriever, options)
+      Sidekiq.logger.info('ThrottleFetch activated')
 
       @throttle_config = redis_intmap(CONFIG_KEY)
       Sidekiq.logger.info("Using throttle config: #{throttle_config}")
@@ -60,6 +64,19 @@ module Simplekiq
     def time_sample_key(time)
       sample_ts = time.strftime('%Y%m%d%H%M')
       "throttle_fetch:#{sample_ts}"
+    end
+  end
+end
+
+# Copied from super-fetch. Shame.
+Sidekiq.configure_server do |config|
+  config.on(:startup) do
+    opts = Sidekiq.options
+    if opts[:fetch] == Simplekiq::ThrottleFetch
+      s = Sidekiq::Pro::SuperFetch::Retriever.new
+      s.listen_for_pauses
+      s.start(opts)
+      Sidekiq::Pro::SuperFetch::Retriever.instance = s
     end
   end
 end
