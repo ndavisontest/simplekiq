@@ -16,11 +16,12 @@ RSpec.describe Simplekiq::Worker do
     end
 
     context 'when its a Rails app' do
-      let(:rails) { double('Rails') }
+      let(:rails) { class_double('Rails') }
       before do
         stub_const('Rails', rails)
+        stub_const('Rails::VERSION::MAJOR', 6)
         allow(rails).to receive_message_chain(
-          'application.class.parent_name.underscore'
+          'application.class.module_parent_name.underscore'
         ).and_return('app_name')
       end
 

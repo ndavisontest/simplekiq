@@ -21,7 +21,11 @@ module Simplekiq
     end
 
     def app_name
-      if defined?(::Rails)
+      return unless defined?(::Rails)
+
+      if ::Rails::VERSION::MAJOR >= 6
+        ::Rails.application.class.module_parent_name.underscore
+      else
         ::Rails.application.class.parent_name.underscore
       end
     end
