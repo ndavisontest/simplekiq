@@ -4,7 +4,6 @@ RUN cd /tmp && curl -L --output ghr.tar.gz https://github.com/tcnksm/ghr/release
 
 WORKDIR /gem
 COPY Gemfile /gem/Gemfile
-COPY Gemfile.lock /gem/Gemfile.lock
 COPY simplekiq.gemspec /gem/simplekiq.gemspec
 COPY lib/simplekiq/version.rb /gem/lib/simplekiq/version.rb
 

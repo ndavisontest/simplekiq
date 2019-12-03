@@ -8,16 +8,38 @@ RSpec.describe Simplekiq do
     it { expect(described_class.app_name).to eq(nil) }
 
     context 'when rails defined' do
-      let(:rails) { double('Rails') }
+      let(:rails) { class_double('Rails') }
+
       before do
         stub_const('Rails', rails)
-        allow(rails).to receive_message_chain(
-          'application.class.parent_name.underscore'
-        ).and_return('app_name')
       end
 
-      it 'overrides default queue' do
-        expect(described_class.app_name).to eq('app_name')
+      context 'with Rails 6' do
+        before do
+          stub_const('Rails::VERSION::MAJOR', 6)
+
+          allow(rails).to receive_message_chain(
+            'application.class.module_parent_name.underscore'
+          ).and_return('app_name')
+        end
+
+        it 'overrides default queue' do
+          expect(described_class.app_name).to eq('app_name')
+        end
+      end
+
+      context 'with Rails 5' do
+        before do
+          stub_const('Rails::VERSION::MAJOR', 5)
+
+          allow(rails).to receive_message_chain(
+            'application.class.parent_name.underscore'
+          ).and_return('app_name')
+        end
+
+        it 'overrides default queue' do
+          expect(described_class.app_name).to eq('app_name')
+        end
       end
     end
   end
