@@ -10,7 +10,7 @@ RSpec.describe Simplekiq::QueueGetter do
       end
 
       it 'overrides default queue' do
-        expect(described_class.queues).to eq(['hard'])
+        expect(described_class.queues).to include('hard')
       end
 
       context 'when strict is true' do
@@ -36,7 +36,7 @@ RSpec.describe Simplekiq::QueueGetter do
         end
 
         it 'respects the override' do
-          expect(described_class.queues).to eq(['some-queue'])
+          expect(described_class.queues).to include('some-queue')
         end
       end
 
@@ -49,7 +49,7 @@ RSpec.describe Simplekiq::QueueGetter do
         end
 
         it 'respects the override' do
-          expect(described_class.queues).to eq(['hard', 'hard'])
+          expect(described_class.queues).to include('hard', 'hard')
         end
       end
 
@@ -62,7 +62,7 @@ RSpec.describe Simplekiq::QueueGetter do
 
         it 'respects the override' do
           allow(ENV).to receive(:fetch).with('SIMPLEKIQ_SKIP_QUEUES', '').and_return('hard')
-          expect(described_class.queues).to eq([])
+          expect(described_class.queues).not_to include('hard')
         end
       end
 
@@ -77,7 +77,7 @@ RSpec.describe Simplekiq::QueueGetter do
         end
 
         it 'overrides default queue' do
-          expect(described_class.queues).to eq(['app_name-hard'])
+          expect(described_class.queues).to include('app_name-hard')
         end
 
         context 'when queue overridden' do
@@ -89,7 +89,7 @@ RSpec.describe Simplekiq::QueueGetter do
           end
 
           it 'respects the override' do
-            expect(described_class.queues).to eq(['some-queue'])
+            expect(described_class.queues).to include('some-queue')
           end
         end
       end
@@ -102,8 +102,8 @@ RSpec.describe Simplekiq::QueueGetter do
         )
       end
 
-      it 'returns nothing' do
-        expect(described_class.queues).to eq([])
+      it 'does not return the queue' do
+        expect(described_class.queues).not_to include('hard')
       end
     end
 

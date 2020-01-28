@@ -47,6 +47,47 @@ This will do two things:
 
 Do _not_ declare queues in your sidekiq configuration file, this will throw an error.
 
+#### Alternative to Sidekiq Batches
+
+Simplekiq now contains a lightweight alternative to Sidekiq Batches. Sidekiq batches are atomic and all jobs in a batch are pushed atomically at the end of the block. Sidekiq batches do not scale when the number of jobs are large. Atomicity is undesirable, and we want workers to start processing while other jobs are being enqueued. Example:
+
+```ruby
+class TaskEnqueuer
+  include Simplekiq::MonitoredEnqueuer
+  sidekiq_options polling_frequency: 600, monitor_timeout: 24 * 60 * 60
+
+  def perform
+    10.times do |id|
+      TaskWorker.perform_async(id: id)
+    end
+  end
+
+  def on_complete(status:, params:)
+    if status.failed > 0
+      Slack::Notify('Complete with failures')
+    else
+      Slack::Notify('Completed successfully')
+    end
+  end
+end
+
+class TaskWorker
+  include Simplekiq::MonitoredWorker
+
+  def perform(params)
+    # Perform task
+  end
+end
+```
+
+Options:
+- polling_frequence: The frequency in which the polling worker runs in seconds
+- monitor_timeout: After this duration, the job is not tracked anymore. This also evicts the status for the enqueuer from redis.
+
+Also triggers callbacks when the jobs are complete. The callback receives 2 params:
+- status: An instance of the `MonitoredJobStatus` class
+- The params for the original job
+
 #### Priority
 
 Instead of declaring the priority for queues in the sidekiq.yml file you can set it directly in a worker, if this is not set the worker will default to priority (1):
