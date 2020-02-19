@@ -2,9 +2,8 @@ require 'spec_helper'
 
 RSpec.describe Simplekiq::Datadog do
   context 'tags' do
-    subject(:tag) do
-      datadog_args[:tags][tag_number].call(nil, nil, nil, nil)
-    end
+    subject(:tag) { datadog_args[:tags][tag_number].call(nil, nil, nil, nil) }
+
     let(:tag_number) { 0 }
     let(:datadog_middleware) do
       Sidekiq.server_middleware.entries.detect do |entry|
@@ -16,7 +15,7 @@ RSpec.describe Simplekiq::Datadog do
       datadog_middleware.instance_variable_get(:@args).first
     end
     context 'when checking first tag' do
-      it { expect(subject).to eq('service:undefined') }
+      it { is_expected.to eq('service:undefined') }
 
       context 'when Rails application' do
         let(:rails) { class_double('Rails') }
@@ -28,14 +27,14 @@ RSpec.describe Simplekiq::Datadog do
           ).and_return('app_name')
         end
 
-        it { expect(subject).to eq('service:app_name') }
+        it { is_expected.to eq('service:app_name') }
       end
     end
     context 'when checking second tag' do
       let(:tag_number) { 1 }
 
       context 'when DATADOG_SIDEKIQ_WORKER_GROUP env variable not set' do
-        it { expect(subject).to eq('worker_group:undefined') }
+        it { is_expected.to eq('worker_group:undefined') }
       end
 
       context 'when DATADOG_SIDEKIQ_WORKER_GROUP env variable set' do
@@ -47,7 +46,7 @@ RSpec.describe Simplekiq::Datadog do
             )
           )
         end
-        it { expect(subject).to eq('worker_group:custom_worker_group') }
+        it { is_expected.to eq('worker_group:custom_worker_group') }
       end
     end
   end
