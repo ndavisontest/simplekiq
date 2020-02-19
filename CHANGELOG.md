@@ -1,8 +1,9 @@
 # Simplekiq Gem Changes
 
-### 4.0.1
+### 4.0.2
 
 - Add DD metric to keep track of worker group(ie: threaded, low_priority, common/undefined)
+- Remove v4.0.1 because of metric got concatenated incorrectly
 
 ### 3.2.7
 
