@@ -1,5 +1,9 @@
 # Simplekiq Gem Changes
 
+### 4.0.1
+
+- Add DD metric to keep track of worker group(ie: threaded, low_priority, common/undefined)
+
 ### 3.2.7
 
 - Add rollkiq to gemspec

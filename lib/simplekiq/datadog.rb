@@ -11,7 +11,10 @@ module Simplekiq
             chain.add(
               Sidekiq::Middleware::Server::Datadog,
               tags: [
-                ->(_worker, _job, _queue, _error) { "service:#{app_name}" }
+                lambda do |_worker, _job, _queue, _error|
+                  worker_group = ENV.fetch('DATADOG_SIDEKIQ_WORKER_GROUP', 'undefined')
+                  "service:#{app_name},worker_group:#{worker_group}"
+                end
               ]
             )
           end

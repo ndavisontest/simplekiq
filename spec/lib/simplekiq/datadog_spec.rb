@@ -8,13 +8,15 @@ RSpec.describe Simplekiq::Datadog do
       end
     end
 
-    let(:datadog_args) { datadog_middleware.instance_variable_get(:@args).first }
+    let(:datadog_args) do
+      datadog_middleware.instance_variable_get(:@args).first
+    end
 
     subject(:tag) do
       datadog_args[:tags].first.call(nil, nil, nil, nil)
     end
 
-    it { expect(subject).to eq('service:undefined') }
+    it { expect(subject).to eq('service:undefined,worker_group:undefined') }
 
     context 'when Rails application' do
       let(:rails) { class_double('Rails') }
@@ -24,9 +26,15 @@ RSpec.describe Simplekiq::Datadog do
         allow(rails).to receive_message_chain(
           'application.class.module_parent_name.underscore'
         ).and_return('app_name')
+        stub_const(
+          'ENV',
+          ENV.to_hash.merge('DATADOG_SIDEKIQ_WORKER_GROUP' => 'custom_worker_group')
+        )
       end
 
-      it { expect(subject).to eq('service:app_name') }
+      it do
+        expect(subject).to eq('service:app_name,worker_group:custom_worker_group')
+      end
     end
   end
 
