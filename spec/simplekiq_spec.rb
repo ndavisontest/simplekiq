@@ -1,4 +1,3 @@
-require 'pry'
 RSpec.describe Simplekiq do
   it "has a version number" do
     expect(Simplekiq::VERSION).not_to be nil
@@ -41,6 +40,18 @@ RSpec.describe Simplekiq do
           expect(described_class.app_name).to eq('app_name')
         end
       end
+    end
+  end
+
+  describe '#enqueue' do
+    subject { described_class.enqueue(params) }
+
+    let(:params) { { queue_name: 'magic-super-queue', class_name: 'MyClassName', params: {} } }
+
+    it 'calls ' do
+      expect(Simplekiq::EnqueueRouter.instance).to receive(:enqueue).with(params).once
+
+      subject
     end
   end
 end
