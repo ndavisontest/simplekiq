@@ -50,13 +50,13 @@ module Simplekiq
       end
     end
 
+    private
+
     def read_instances_from_environment
       matching_envs.each do |service_name, url|
         add_pool(service_name, url)
       end
     end
-
-    private
 
     def initialize
       super()
