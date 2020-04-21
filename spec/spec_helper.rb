@@ -1,9 +1,10 @@
 require 'bundler/setup'
+require 'climate_control'
+require 'fakeredis'
 require 'pry'
 require 'sidekiq/testing'
 require 'simplekiq'
 require 'timecop'
-require 'fakeredis'
 
 RSpec.configure do |config|
   # Enable flags like --only-failures and --next-failure

@@ -3,6 +3,7 @@ require 'core_extensions/hash'
 require 'sidekiq/cli'
 require 'simplekiq/config'
 require 'simplekiq/datadog'
+require 'simplekiq/enqueue_router'
 require 'simplekiq/job_retry'
 require 'simplekiq/metadata_client'
 require 'simplekiq/metadata_server'
@@ -30,6 +31,10 @@ module Simplekiq
       else
         ::Rails.application.class.parent_name.underscore
       end
+    end
+
+    def enqueue_with_routing(kwargs)
+      Simplekiq::EnqueueRouter.instance.enqueue(kwargs)
     end
   end
 end
