@@ -1,5 +1,9 @@
 # Simplekiq Gem Changes
 
+### 4.1.0
+
+- Add queue routing via environment variables using enqueue_with_routing
+
 ### 4.0.2
 
 - Add DD metric to keep track of worker group(ie: threaded, low_priority, common/undefined)
