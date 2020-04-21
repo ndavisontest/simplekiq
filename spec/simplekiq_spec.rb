@@ -43,13 +43,13 @@ RSpec.describe Simplekiq do
     end
   end
 
-  describe '#enqueue' do
-    subject { described_class.enqueue(params) }
+  describe '#enqueue_with_routing' do
+    subject { described_class.enqueue_with_routing(params) }
 
     let(:params) { { queue_name: 'magic-super-queue', class_name: 'MyClassName', params: {} } }
 
     it 'calls ' do
-      expect(Simplekiq::EnqueueRouter.instance).to receive(:enqueue).with(params).once
+      expect(Simplekiq::EnqueueRouter.instance).to receive(:enqueue_with_routing).with(params).once
 
       subject
     end

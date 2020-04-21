@@ -33,7 +33,7 @@ module Simplekiq
       end
     end
 
-    def enqueue(kwargs)
+    def enqueue_with_routing(kwargs)
       Simplekiq::EnqueueRouter.instance.enqueue(kwargs)
     end
   end
