@@ -19,7 +19,7 @@ module Simplekiq
       alt_redis = redis_for_service(service)
 
       if defined?(::Chime::Dog)
-        Chime::Dog.increment('sidekiq.remote_enqueue', tags: { destination: service })
+        Chime::Dog.increment('sidekiq.remote_enqueue', tags: { queue_name: queue_name, destination: service })
       end
 
       Sidekiq::Client.via(alt_redis) { Sidekiq::Client.push(push_params.stringify_keys) }

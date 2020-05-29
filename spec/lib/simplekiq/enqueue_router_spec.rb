@@ -86,7 +86,7 @@ RSpec.describe Simplekiq::EnqueueRouter do
         enqueue
         expect(chime_dog)
           .to have_received(:increment)
-          .with('sidekiq.remote_enqueue', tags: { destination: service_name })
+          .with('sidekiq.remote_enqueue', tags: { queue_name: queue_name, destination: service_name })
       end
     end
 
